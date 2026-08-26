@@ -1,0 +1,191 @@
+{
+  "feature_names": [
+    "duration",
+    "amount",
+    "installment_rate",
+    "present_residence",
+    "age",
+    "number_credits",
+    "people_liable",
+    "status=... < 100 DM",
+    "status=... >= 200 DM / salary for at least 1 year",
+    "status=0 <= ... < 200 DM",
+    "status=no checking account",
+    "credit_history=all credits at this bank paid back duly",
+    "credit_history=critical account/other credits existing",
+    "credit_history=delay in paying off in the past",
+    "credit_history=existing credits paid back duly till now",
+    "credit_history=no credits taken/all credits paid back duly",
+    "purpose=business",
+    "purpose=car (new)",
+    "purpose=car (used)",
+    "purpose=domestic appliances",
+    "purpose=education",
+    "purpose=furniture/equipment",
+    "purpose=others",
+    "purpose=radio/television",
+    "purpose=repairs",
+    "purpose=retraining",
+    "savings=... < 100 DM",
+    "savings=... >= 1000 DM",
+    "savings=100 <= ... < 500 DM",
+    "savings=500 <= ... < 1000 DM",
+    "savings=unknown/no savings account",
+    "employment_duration=... < 1 year",
+    "employment_duration=... >= 7 years",
+    "employment_duration=1 <= ... < 4 years",
+    "employment_duration=4 <= ... < 7 years",
+    "employment_duration=unemployed",
+    "personal_status_sex=female : divorced/separated/married",
+    "personal_status_sex=male : divorced/separated",
+    "personal_status_sex=male : married/widowed",
+    "personal_status_sex=male : single",
+    "other_debtors=co-applicant",
+    "other_debtors=guarantor",
+    "other_debtors=none",
+    "property=building society savings agreement/life insurance",
+    "property=car or other",
+    "property=real estate",
+    "property=unknown/no property",
+    "other_installment_plans=bank",
+    "other_installment_plans=none",
+    "other_installment_plans=stores",
+    "housing=for free",
+    "housing=own",
+    "housing=rent",
+    "job=management/self-employed/highly qualified employee/officer",
+    "job=skilled employee/official",
+    "job=unemployed/unskilled - non-resident",
+    "job=unskilled - resident",
+    "telephone=no",
+    "telephone=yes",
+    "foreign_worker=no",
+    "foreign_worker=yes"
+  ],
+  "numeric_cols": [
+    "duration",
+    "amount",
+    "installment_rate",
+    "present_residence",
+    "age",
+    "number_credits",
+    "people_liable"
+  ],
+  "numeric_mean": [
+    20.902999877929688,
+    3271.258056640625,
+    2.9730000495910645,
+    2.8450000286102295,
+    35.54600143432617,
+    1.406999945640564,
+    1.1549999713897705
+  ],
+  "numeric_std": [
+    12.052783966064453,
+    2821.3251953125,
+    1.1181551218032837,
+    1.103165864944458,
+    11.369779586791992,
+    0.5773655772209167,
+    0.36190465092658997
+  ],
+  "categorical_cols": [
+    "status",
+    "credit_history",
+    "purpose",
+    "savings",
+    "employment_duration",
+    "personal_status_sex",
+    "other_debtors",
+    "property",
+    "other_installment_plans",
+    "housing",
+    "job",
+    "telephone",
+    "foreign_worker"
+  ],
+  "categorical_categories": {
+    "status": [
+      "... < 100 DM",
+      "... >= 200 DM / salary for at least 1 year",
+      "0 <= ... < 200 DM",
+      "no checking account"
+    ],
+    "credit_history": [
+      "all credits at this bank paid back duly",
+      "critical account/other credits existing",
+      "delay in paying off in the past",
+      "existing credits paid back duly till now",
+      "no credits taken/all credits paid back duly"
+    ],
+    "purpose": [
+      "business",
+      "car (new)",
+      "car (used)",
+      "domestic appliances",
+      "education",
+      "furniture/equipment",
+      "others",
+      "radio/television",
+      "repairs",
+      "retraining"
+    ],
+    "savings": [
+      "... < 100 DM",
+      "... >= 1000 DM",
+      "100 <= ... < 500 DM",
+      "500 <= ... < 1000 DM",
+      "unknown/no savings account"
+    ],
+    "employment_duration": [
+      "... < 1 year",
+      "... >= 7 years",
+      "1 <= ... < 4 years",
+      "4 <= ... < 7 years",
+      "unemployed"
+    ],
+    "personal_status_sex": [
+      "female : divorced/separated/married",
+      "male : divorced/separated",
+      "male : married/widowed",
+      "male : single"
+    ],
+    "other_debtors": [
+      "co-applicant",
+      "guarantor",
+      "none"
+    ],
+    "property": [
+      "building society savings agreement/life insurance",
+      "car or other",
+      "real estate",
+      "unknown/no property"
+    ],
+    "other_installment_plans": [
+      "bank",
+      "none",
+      "stores"
+    ],
+    "housing": [
+      "for free",
+      "own",
+      "rent"
+    ],
+    "job": [
+      "management/self-employed/highly qualified employee/officer",
+      "skilled employee/official",
+      "unemployed/unskilled - non-resident",
+      "unskilled - resident"
+    ],
+    "telephone": [
+      "no",
+      "yes"
+    ],
+    "foreign_worker": [
+      "no",
+      "yes"
+    ]
+  },
+  "input_dim": 61,
+  "target_definition": "risk_label=1 means BAD/risky credit (flip of raw credit_risk column)"
+}
