@@ -130,13 +130,15 @@ git status
 Stage only the Python code files you want to push:
 
 ```bash
-git add model/train.py model/export_onnx.py circuit/compile.py circuit/verify_circuit.py
+git status --short '*.py'
+git add '*.py'
 ```
 
 Then stage this documentation file:
 
 ```bash
-git add steps.md
+git status --short '*.md'
+git add '*.md'
 ```
 
 Check exactly what is staged:
