@@ -1,4 +1,4 @@
-# Model Accuracy Report — Phase 1
+# Model Accuracy Report - Phase 1
 
 ## Dataset
 - Source: German Credit (Statlog), 1000 records, 20 raw features.
@@ -6,8 +6,8 @@
   13 categorical features one-hot encoded.
 - Final feature vector dimension: **61**.
 - Train/test split: 800/200 (80/20, stratified, random_state=42).
-- Target: `risk_label` — 1 = bad/risky credit, 0 = good credit (flip of raw `credit_risk` column).
-  Class balance: 300 risky / 700 good in the full dataset (imbalanced — noted below).
+- Target: `risk_label` - 1 = bad/risky credit, 0 = good credit (flip of raw `credit_risk` column).
+  Class balance: 300 risky / 700 good in the full dataset (imbalanced, noted below).
 
 ## Logistic Regression (baseline)
 - Train accuracy: **0.7788**
@@ -26,7 +26,7 @@
 Logistic regression is selected as the default unless the FFN shows a clear, meaningful accuracy improvement (>1pt), because a smaller/linear model keeps the EZKL circuit size and proving time manageable (see Rules.md).
 
 ## Notes / Caveats
-- The dataset is imbalanced (70% good / 30% risky). Accuracy alone can be misleading here —
+- The dataset is imbalanced (70% good / 30% risky). Accuracy alone can be misleading here,
   the confusion matrix above is the more honest signal; a trivial "always predict good"
   classifier would score ~70% test accuracy without being useful. Both models are compared
   against that baseline, not just against each other.
