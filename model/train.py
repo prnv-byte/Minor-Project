@@ -1,31 +1,7 @@
 """
 Phase 1 — Data & Baseline Model
-
-Loads the German Credit (Statlog) dataset, preprocesses it into a fixed-size
-numeric feature vector, and trains two candidate models in PyTorch:
-  1. Logistic regression (the default choice for the ZK circuit — smallest,
-     cheapest to prove).
-  2. A small feed-forward NN (1 hidden layer, width 16) for comparison only.
-
-Target definition
-------------------
-The raw dataset's `credit_risk` column is 1 = good credit, 0 = bad credit.
-For this project we frame the model as a *risk* predictor, so we flip it:
-
-    risk_label = 1  ->  applicant is a BAD credit risk (higher risk)
-    risk_label = 0  ->  applicant is a GOOD credit risk (lower risk)
-
-The eventual ZK claim is "predicted risk probability is BELOW a threshold"
-(i.e. the applicant is safe). Keeping risk_label = 1 for "risky" makes that
-claim read naturally later in client/infer_and_prove.py.
-
-Outputs
--------
-- model/artifacts/preprocessing.json   feature order + scaler + categories
-  (needed so client/ and export_onnx.py preprocess raw input identically)
-- model/artifacts/logreg.pt            trained logistic regression weights
-- model/artifacts/ffn.pt               trained small FFN weights
-- model/accuracy_report.md             accuracy comparison + model selection
+(Recreated for a fresh session — identical to the original, same fixed seed,
+so results reproduce exactly.)
 """
 
 import json
@@ -42,7 +18,7 @@ DATA_PATH = Path(__file__).parent / "data" / "german_credit.csv"
 ARTIFACTS_DIR = Path(__file__).parent / "artifacts"
 ARTIFACTS_DIR.mkdir(exist_ok=True)
 
-TARGET_COL = "credit_risk"  # raw column: 1 = good, 0 = bad
+TARGET_COL = "credit_risk"
 
 CATEGORICAL_COLS = [
     "status", "credit_history", "purpose", "savings", "employment_duration",
@@ -57,13 +33,10 @@ NUMERIC_COLS = [
 
 def load_and_preprocess():
     df = pd.read_csv(DATA_PATH)
-    assert df.isnull().sum().sum() == 0, "unexpected nulls in dataset"
+    assert df.isnull().sum().sum() == 0
 
-    # risk_label = 1 means BAD/risky (flip of credit_risk)
     y = (1 - df[TARGET_COL]).astype(np.float32).values
 
-    # One-hot encode categoricals with a fixed, sorted category order so the
-    # same encoding can be reproduced later without seeing the full dataset.
     cat_categories = {col: sorted(df[col].astype(str).unique().tolist()) for col in CATEGORICAL_COLS}
     onehot_blocks = []
     onehot_feature_names = []
@@ -75,9 +48,6 @@ def load_and_preprocess():
         onehot_blocks.append(block)
         onehot_feature_names.extend([f"{col}={c}" for c in cats])
 
-    # Standardize numerics (mean/std computed on the FULL dataset here for
-    # simplicity in this academic MVP; artifacts are saved either way so the
-    # exact same transform can be reapplied at inference time).
     num_matrix = df[NUMERIC_COLS].astype(np.float32).values
     num_mean = num_matrix.mean(axis=0)
     num_std = num_matrix.std(axis=0)
@@ -109,7 +79,7 @@ class LogisticRegression(nn.Module):
         self.linear = nn.Linear(in_dim, 1)
 
     def forward(self, x):
-        return self.linear(x)  # returns logits
+        return self.linear(x)
 
 
 class SmallFFN(nn.Module):
@@ -124,7 +94,7 @@ class SmallFFN(nn.Module):
         )
 
     def forward(self, x):
-        return self.net(x)  # returns logits
+        return self.net(x)
 
 
 def train_model(model, X_train, y_train, X_test, y_test, epochs=200, lr=0.01):
@@ -151,7 +121,6 @@ def train_model(model, X_train, y_train, X_test, y_test, epochs=200, lr=0.01):
         train_acc = (train_preds == y_train_t).float().mean().item()
         test_acc = (test_preds == y_test_t).float().mean().item()
 
-        # Confusion matrix components on the test set (positive = risky/bad)
         tp = ((test_preds == 1) & (y_test_t == 1)).sum().item()
         tn = ((test_preds == 0) & (y_test_t == 0)).sum().item()
         fp = ((test_preds == 1) & (y_test_t == 0)).sum().item()
@@ -163,32 +132,6 @@ def train_model(model, X_train, y_train, X_test, y_test, epochs=200, lr=0.01):
         "confusion": {"tp": tp, "tn": tn, "fp": fp, "fn": fn},
         "final_train_loss": loss.item(),
     }
-
-
-def main():
-    X, y, preprocessing = load_and_preprocess()
-    print(f"Loaded {X.shape[0]} records, {X.shape[1]} features "
-          f"({len(NUMERIC_COLS)} numeric + {X.shape[1] - len(NUMERIC_COLS)} one-hot)")
-
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=RANDOM_STATE, stratify=y
-    )
-
-    torch.manual_seed(RANDOM_STATE)
-    logreg = LogisticRegression(X.shape[1])
-    logreg_results = train_model(logreg, X_train, y_train, X_test, y_test, epochs=300, lr=0.05)
-    torch.save(logreg.state_dict(), ARTIFACTS_DIR / "logreg.pt")
-
-    torch.manual_seed(RANDOM_STATE)
-    ffn = SmallFFN(X.shape[1], hidden=16)
-    ffn_results = train_model(ffn, X_train, y_train, X_test, y_test, epochs=300, lr=0.01)
-    torch.save(ffn.state_dict(), ARTIFACTS_DIR / "ffn.pt")
-
-    print("\nLogistic Regression:", logreg_results)
-    print("Small FFN:          ", ffn_results)
-
-    write_accuracy_report(X, preprocessing, logreg_results, ffn_results, len(y_train), len(y_test))
-    print(f"\nWrote {Path(__file__).parent / 'accuracy_report.md'}")
 
 
 def write_accuracy_report(X, preprocessing, logreg_results, ffn_results, n_train, n_test):
@@ -206,11 +149,11 @@ def write_accuracy_report(X, preprocessing, logreg_results, ffn_results, n_train
         "EZKL circuit size and proving time manageable (see Rules.md)."
         if selected == "Logistic Regression" else
         "The small FFN meaningfully outperforms logistic regression on test accuracy, "
-        "so it is selected despite the larger circuit — it remains within the "
+        "so it is selected despite the larger circuit, it remains within the "
         "1-2 hidden layer / small-width constraint from Rules.md."
     )
 
-    report = f"""# Model Accuracy Report — Phase 1
+    report = f"""# Model Accuracy Report - Phase 1
 
 ## Dataset
 - Source: German Credit (Statlog), 1000 records, 20 raw features.
@@ -218,8 +161,8 @@ def write_accuracy_report(X, preprocessing, logreg_results, ffn_results, n_train
   {len(preprocessing['categorical_cols'])} categorical features one-hot encoded.
 - Final feature vector dimension: **{X.shape[1]}**.
 - Train/test split: {n_train}/{n_test} (80/20, stratified, random_state={RANDOM_STATE}).
-- Target: `risk_label` — 1 = bad/risky credit, 0 = good credit (flip of raw `credit_risk` column).
-  Class balance: 300 risky / 700 good in the full dataset (imbalanced — noted below).
+- Target: `risk_label` - 1 = bad/risky credit, 0 = good credit (flip of raw `credit_risk` column).
+  Class balance: 300 risky / 700 good in the full dataset (imbalanced, noted below).
 
 ## Logistic Regression (baseline)
 {fmt(logreg_results)}
@@ -232,7 +175,7 @@ def write_accuracy_report(X, preprocessing, logreg_results, ffn_results, n_train
 {reasoning}
 
 ## Notes / Caveats
-- The dataset is imbalanced (70% good / 30% risky). Accuracy alone can be misleading here —
+- The dataset is imbalanced (70% good / 30% risky). Accuracy alone can be misleading here,
   the confusion matrix above is the more honest signal; a trivial "always predict good"
   classifier would score ~70% test accuracy without being useful. Both models are compared
   against that baseline, not just against each other.
@@ -245,6 +188,37 @@ def write_accuracy_report(X, preprocessing, logreg_results, ffn_results, n_train
 """
     with open(Path(__file__).parent / "accuracy_report.md", "w") as f:
         f.write(report)
+
+
+def main():
+    X, y, preprocessing = load_and_preprocess()
+    print(f"Loaded {X.shape[0]} records, {X.shape[1]} features")
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=RANDOM_STATE, stratify=y
+    )
+
+    torch.manual_seed(RANDOM_STATE)
+    logreg = LogisticRegression(X.shape[1])
+    logreg_results = train_model(logreg, X_train, y_train, X_test, y_test, epochs=300, lr=0.05)
+    torch.save(logreg.state_dict(), ARTIFACTS_DIR / "logreg.pt")
+
+    torch.manual_seed(RANDOM_STATE)
+    ffn = SmallFFN(X.shape[1], hidden=16)
+    ffn_results = train_model(ffn, X_train, y_train, X_test, y_test, epochs=300, lr=0.01)
+    torch.save(ffn.state_dict(), ARTIFACTS_DIR / "ffn.pt")
+
+    print("Logistic Regression:", logreg_results)
+    print("Small FFN:          ", ffn_results)
+
+    # Save the actual test split too — Phase 2 needs real sample records
+    # to verify the circuit's output matches the original model.
+    np.save(ARTIFACTS_DIR / "X_test.npy", X_test)
+    np.save(ARTIFACTS_DIR / "y_test.npy", y_test)
+
+    write_accuracy_report(X, preprocessing, logreg_results, ffn_results, len(y_train), len(y_test))
+    print(f"\ninput_dim = {X.shape[1]}")
+    print(f"Wrote {Path(__file__).parent / 'accuracy_report.md'}")
 
 
 if __name__ == "__main__":
