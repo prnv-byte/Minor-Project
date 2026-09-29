@@ -1,0 +1,22 @@
+{
+  "status": "0 <= ... < 200 DM",
+  "duration": 24,
+  "credit_history": "critical account/other credits existing",
+  "purpose": "furniture/equipment",
+  "amount": 4200,
+  "savings": "100 <= ... < 500 DM",
+  "employment_duration": "1 <= ... < 4 years",
+  "installment_rate": 3,
+  "personal_status_sex": "female : divorced/separated/married",
+  "other_debtors": "guarantor",
+  "present_residence": 2,
+  "property": "car or other",
+  "age": 41,
+  "other_installment_plans": "bank",
+  "housing": "rent",
+  "number_credits": 1,
+  "job": "skilled employee/official",
+  "people_liable": 1,
+  "telephone": "no",
+  "foreign_worker": "yes"
+}
