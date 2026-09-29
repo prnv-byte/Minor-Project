@@ -1,0 +1,22 @@
+{
+  "status": "no checking account",
+  "duration": 12,
+  "credit_history": "existing credits paid back duly till now",
+  "purpose": "radio/television",
+  "amount": 1500,
+  "savings": "... >= 1000 DM",
+  "employment_duration": "... >= 7 years",
+  "installment_rate": 2,
+  "personal_status_sex": "male : single",
+  "other_debtors": "none",
+  "present_residence": 4,
+  "property": "real estate",
+  "age": 35,
+  "other_installment_plans": "none",
+  "housing": "own",
+  "number_credits": 1,
+  "job": "skilled employee/official",
+  "people_liable": 1,
+  "telephone": "yes",
+  "foreign_worker": "yes"
+}
